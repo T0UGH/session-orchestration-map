@@ -6,282 +6,590 @@
   <title>Multi-Session Orchestration Map</title>
   <style>
     :root {
-      --bg: #08111f;
-      --panel: rgba(11, 20, 38, 0.9);
-      --panel-2: rgba(16, 28, 48, 0.96);
-      --text: #eef4ff;
-      --muted: #96a8ca;
-      --soft: rgba(255,255,255,.08);
-      --line: rgba(122,160,255,.72);
-      --line-soft: rgba(122,160,255,.28);
-      --claude: #66b3ff;
-      --codex: #5fd594;
-      --mira: #b48cff;
-      --human: #f1c76e;
-      --reviewer: #ff7f9c;
-      --router: #ffb66c;
-      --shadow: 0 24px 60px rgba(0,0,0,.34);
-      --max: 1620px;
+      --bg: #07111f;
+      --panel: #0e1b30;
+      --panel-2: #12233d;
+      --text: #edf4ff;
+      --muted: #93a4c8;
+      --soft: rgba(255,255,255,.06);
+      --line: rgba(135, 161, 255, .24);
+      --line-2: rgba(135, 161, 255, .46);
+      --claude: #5fb0ff;
+      --codex: #55d391;
+      --mira: #b287ff;
+      --human: #f0c46a;
+      --reviewer: #ff7a98;
+      --router: #ffb467;
+      --glow: 0 22px 60px rgba(0,0,0,.35);
+      --radius: 18px;
+      --max: 1500px;
     }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
-    body{
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 12% 0%, rgba(102,179,255,.14), transparent 28%),
-        radial-gradient(circle at 86% 8%, rgba(255,127,156,.08), transparent 22%),
-        linear-gradient(180deg, #08111f 0%, #0b1527 100%);
+        radial-gradient(circle at 15% 0%, rgba(95,176,255,.14), transparent 28%),
+        radial-gradient(circle at 100% 10%, rgba(178,135,255,.10), transparent 24%),
+        linear-gradient(180deg, #07111f 0%, #0a1324 100%);
     }
-    .page{max-width:var(--max);margin:0 auto;padding:24px 18px 72px}
-    .hero{display:grid;grid-template-columns:1.35fr .9fr;gap:18px;margin-bottom:18px}
-    .card{background:var(--panel);border:1px solid var(--soft);border-radius:26px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
-    .hero-main,.hero-side{padding:22px 24px}
-    .eyebrow{color:var(--human);font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
-    h1{margin:0 0 12px;font-size:clamp(30px,4vw,46px);line-height:1.05;letter-spacing:-.03em}
-    .subtitle{font-size:16px;color:var(--muted);max-width:900px}
-    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-    .chip{font-size:12px;padding:7px 11px;border-radius:999px;border:1px solid var(--soft);background:rgba(255,255,255,.03);color:#dce7ff}
-    .hero-side h3{margin:0 0 10px;font-size:15px}
-    .legend{display:grid;gap:8px}
-    .legend-item{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
-    .sw{width:12px;height:12px;border-radius:999px}
-    .note{margin-top:14px;padding:12px 14px;border-radius:16px;border:1px dashed rgba(255,255,255,.12);background:rgba(255,255,255,.025);color:#c6d3f0;font-size:12px}
 
-    .map{position:relative;background:var(--panel);border:1px solid var(--soft);border-radius:30px;box-shadow:var(--shadow);overflow:hidden}
-    .map::before{content:"";position:absolute;inset:0;background-image:linear-gradient(to right,rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.03) 1px,transparent 1px);background-size:36px 36px;opacity:.45;pointer-events:none}
-    svg{display:block;width:100%;height:auto;position:relative;z-index:0}
-    .labels{position:absolute;inset:0;z-index:2;pointer-events:none}
-    .label{position:absolute;padding:6px 10px;border-radius:999px;border:1px solid var(--soft);background:rgba(8,17,31,.92);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#dce7ff}
-    .node{position:absolute;pointer-events:auto;background:var(--panel-2);border:1px solid var(--soft);border-radius:999px;padding:14px 18px;box-shadow:0 16px 34px rgba(0,0,0,.26);min-height:90px;display:flex;flex-direction:column;justify-content:center}
-    .node::before{content:"";position:absolute;left:18px;right:18px;top:0;height:3px;border-radius:999px;background:rgba(255,255,255,.08)}
-    .node.claude::before{background:var(--claude)}
-    .node.codex::before{background:var(--codex)}
-    .node.mira::before{background:var(--mira)}
-    .node.human::before{background:var(--human)}
-    .node.reviewer::before{background:var(--reviewer)}
-    .node.router::before{background:var(--router)}
-    .node h4{margin:0 0 7px;font-size:15px;line-height:1.15}
-    .node p{margin:0;color:var(--muted);font-size:12px;line-height:1.35}
-    .meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-    .tag{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--soft);background:rgba(255,255,255,.03);color:#dce7ff}
-    .small{min-height:64px;padding:12px 16px}
-    .small h4{font-size:13px;margin-bottom:5px}
-    .small p{font-size:11px}
-    .footer{margin-top:16px;padding:16px 18px;border-radius:18px;background:var(--panel);border:1px solid var(--soft);color:var(--muted);font-size:13px}
-    .footer b{color:var(--text)}
-    @media (max-width: 1180px){.hero{grid-template-columns:1fr}.map{overflow:auto}svg,.labels{min-width:1600px}}
+    .page { max-width: var(--max); margin: 0 auto; padding: 28px 22px 80px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.65fr .95fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .hero-card, .legend, .stage, .spine-label {
+      background: rgba(14,27,48,.88);
+      border: 1px solid var(--soft);
+      border-radius: 24px;
+      box-shadow: var(--glow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card, .legend { padding: 22px 24px; }
+
+    .eyebrow {
+      color: var(--human);
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 4vw, 50px);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    }
+
+    .subtitle { color: var(--muted); font-size: 16px; max-width: 860px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .pill {
+      padding: 7px 12px; border-radius: 999px; border: 1px solid var(--soft);
+      background: rgba(255,255,255,.03); font-size: 12px; color: #dbe7ff;
+    }
+
+    .legend h3 { margin: 0 0 12px; font-size: 15px; }
+    .legend ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    .legend li { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .swatch { width: 12px; height: 12px; border-radius: 999px; }
+
+    .map {
+      position: relative;
+      padding-top: 8px;
+    }
+
+    .spine {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(95,176,255,.05), rgba(95,176,255,.35), rgba(255,122,152,.25), rgba(255,180,103,.2));
+      filter: drop-shadow(0 0 14px rgba(95,176,255,.18));
+    }
+
+    .stage {
+      position: relative;
+      margin: 18px 0;
+      padding: 18px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,.00)),
+        rgba(14,27,48,.82);
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.022) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 30px 30px;
+      pointer-events: none;
+      opacity: .32;
+    }
+
+    .stage-head {
+      position: relative;
+      z-index: 1;
+      display: flex; justify-content: space-between; gap: 18px; align-items: baseline;
+      margin-bottom: 14px;
+    }
+    .stage-id { color: var(--human); font-size: 11px; text-transform: uppercase; letter-spacing: .15em; }
+    .stage-title { font-size: 20px; font-weight: 700; margin-top: 4px; }
+    .stage-desc { color: var(--muted); font-size: 13px; max-width: 760px; }
+
+    .node {
+      position: relative;
+      z-index: 1;
+      background: rgba(18,35,61,.88);
+      border: 1px solid var(--soft);
+      border-radius: 999px;
+      padding: 14px 14px 12px;
+      min-height: 94px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .node::before {
+      content: "";
+      position: absolute; left: 0; right: 0; top: 0; height: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+    }
+    .node.claude::before { background: var(--claude); }
+    .node.codex::before { background: var(--codex); }
+    .node.mira::before { background: var(--mira); }
+    .node.human::before { background: var(--human); }
+    .node.reviewer::before { background: var(--reviewer); }
+    .node.router::before { background: var(--router); }
+
+    .node h4 { margin: 0 0 8px; font-size: 15px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
+    .tag {
+      font-size: 11px; color: #d8e4ff; border: 1px solid var(--soft);
+      background: rgba(255,255,255,.03); padding: 4px 8px; border-radius: 999px;
+    }
+    .node p, .node li { color: var(--muted); font-size: 12px; margin: 0; }
+    .node ul { margin: 0; padding-left: 16px; display: grid; gap: 5px; }
+
+    .center-col {
+      max-width: 420px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .split-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .design-loop {
+      display: grid;
+      grid-template-columns: 1.15fr .9fr 1.1fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .design-center, .loop-box {
+      border: 2px dashed rgba(255,255,255,.16);
+      border-radius: 26px;
+      padding: 12px;
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,.025);
+    }
+
+    .loop-label {
+      color: #bfd0ff;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: 10px;
+    }
+
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #8fa4d8;
+      font-size: 18px;
+      opacity: .9;
+    }
+
+    .parallel-agents {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .agent-loop {
+      border: 2px dashed rgba(255,255,255,.16);
+      border-radius: 999px;
+      padding: 12px;
+      background: rgba(255,255,255,.025);
+      position: relative;
+    }
+
+    .agent-loop .arc {
+      border: 1px dashed rgba(255,255,255,.16);
+      border-radius: 26px;
+      padding: 10px;
+      margin-top: 10px;
+      color: #c8d6f6;
+      font-size: 12px;
+    }
+
+    .agent-name {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 10px;
+    }
+
+    .agent-name strong { font-size: 14px; }
+
+    .arrow-row {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      color: #7f94c5; font-size: 16px; margin: 6px 0;
+    }
+
+    .global-wrap {
+      display: grid;
+      grid-template-columns: 1fr minmax(280px, 360px) 1fr;
+      gap: 12px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .global-center {
+      border: 1px dashed rgba(255,122,152,.45);
+      border-radius: 999px;
+      padding: 12px;
+      background: rgba(255,122,152,.03);
+    }
+
+    .return-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tiny-note {
+      margin-top: 10px; color: #c1cff0; font-size: 12px;
+      border: 1px dashed rgba(255,255,255,.12); border-radius: 14px; padding: 10px 12px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .footer {
+      margin-top: 22px;
+      background: rgba(14,27,48,.88);
+      border: 1px solid var(--soft);
+      border-radius: 26px;
+      padding: 16px 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1280px) {
+      .design-loop, .global-wrap { grid-template-columns: 1fr; }
+      .split-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .parallel-agents { grid-template-columns: 1fr; }
+      .return-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .spine { display: none; }
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .split-grid, .return-grid { grid-template-columns: 1fr; }
+      .page { padding: 18px 12px 56px; }
+      h1 { font-size: 34px; }
+    }
   </style>
 </head>
 <body>
   <div class="page">
     <section class="hero">
-      <div class="card hero-main">
-        <div class="eyebrow">Ellipse-Based Orchestration Map</div>
-        <h1>大需求开发中的多层回环编排图</h1>
-        <div class="subtitle">这版按你的要求改成椭圆 / 胶囊形节点，并把之前省掉的关键内容补回图里。目标不是极简，而是既看得出回环，也看得出每一层到底在干什么。</div>
-        <div class="chips">
-          <span class="chip">椭圆节点</span>
-          <span class="chip">不省略关键环节</span>
-          <span class="chip">大环规整</span>
-          <span class="chip">小环自由</span>
-          <span class="chip">Global Reviewer 汇总</span>
+      <div class="hero-card">
+        <div class="eyebrow">System Orchestration View</div>
+        <h1>Human-Controlled Multi-Session Orchestration</h1>
+        <div class="subtitle">
+          回到第二版的清晰结构，在这个基础上补强一点回环感、顺序感和汇总关系。重点还是先让人看懂，而不是把整张图搅成复杂拓扑。
+        </div>
+        <div class="pills">
+          <span class="pill">Session 主角</span>
+          <span class="pill">系统编排图式</span>
+          <span class="pill">并排 loop 模块</span>
+          <span class="pill">Global Reviewer 汇总</span>
+          <span class="pill">Conditional Return</span>
         </div>
       </div>
-      <div class="card hero-side">
+      <aside class="legend">
         <h3>Legend</h3>
-        <div class="legend">
-          <div class="legend-item"><span class="sw" style="background:var(--claude)"></span>Claude Code：brainstorm / plan / review</div>
-          <div class="legend-item"><span class="sw" style="background:var(--codex)"></span>Codex：review / coding</div>
-          <div class="legend-item"><span class="sw" style="background:var(--mira)"></span>Mira：additional reviewer</div>
-          <div class="legend-item"><span class="sw" style="background:var(--human)"></span>Human：controller + manual executor</div>
-          <div class="legend-item"><span class="sw" style="background:var(--reviewer)"></span>Reviewer gate / global reviewer</div>
-          <div class="legend-item"><span class="sw" style="background:var(--router)"></span>Conditional return router</div>
-        </div>
-        <div class="note">现在主图里保留了：brainstorm、多路问题发现、技术评审、跨仓拆解、三个 agent 的 plan 回环、实现回环、global reviewer、验证与条件回流。</div>
-      </div>
+        <ul>
+          <li><span class="swatch" style="background:var(--claude)"></span>Claude Code：plan / review / design</li>
+          <li><span class="swatch" style="background:var(--codex)"></span>Codex：review / coding</li>
+          <li><span class="swatch" style="background:var(--mira)"></span>Mira：additional reviewer</li>
+          <li><span class="swatch" style="background:var(--human)"></span>Human：controller + manual executor</li>
+          <li><span class="swatch" style="background:var(--reviewer)"></span>Reviewer Gate：阶段出口</li>
+          <li><span class="swatch" style="background:var(--router)"></span>Router：按问题性质回流</li>
+        </ul>
+      </aside>
     </section>
 
-    <section class="map">
-      <svg viewBox="0 0 1600 1320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(122,160,255,.88)"/></marker>
-          <marker id="arrowPink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,127,156,.95)"/></marker>
-          <marker id="arrowOrange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,182,108,.95)"/></marker>
-        </defs>
+    <div class="map">
+      <div class="spine"></div>
 
-        <!-- stage regions -->
-        <rect x="34" y="44" width="1532" height="1230" rx="28" fill="rgba(255,255,255,.012)"/>
-        <rect x="54" y="110" width="1492" height="230" rx="28" fill="rgba(255,255,255,.016)"/>
-        <rect x="54" y="364" width="1492" height="180" rx="28" fill="rgba(255,255,255,.014)"/>
-        <rect x="54" y="570" width="1492" height="310" rx="28" fill="rgba(255,255,255,.014)"/>
-        <rect x="54" y="906" width="1492" height="244" rx="28" fill="rgba(255,255,255,.014)"/>
-        <rect x="54" y="1172" width="1492" height="78" rx="28" fill="rgba(255,255,255,.014)"/>
+      <section class="stage">
+        <div class="stage-head">
+          <div>
+            <div class="stage-id">Stage 01</div>
+            <div class="stage-title">Demand / Intent</div>
+          </div>
+          <div class="stage-desc">起点很薄：一句话需求。整个系统的所有 session 都从这里展开。</div>
+        </div>
+        <div class="center-col">
+          <article class="node human">
+            <h4>一句话需求</h4>
+            <div class="meta"><span class="tag">Origin</span><span class="tag">Human framing</span></div>
+            <p>不是直接写代码，而是先进入 design 收敛大回环。</p>
+          </article>
+        </div>
+      </section>
 
-        <!-- main down order -->
-        <path d="M800 112 L800 170" stroke="rgba(122,160,255,.86)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M800 334 L800 392" stroke="rgba(122,160,255,.86)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M800 540 L800 602" stroke="rgba(122,160,255,.86)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M800 878 L800 940" stroke="rgba(122,160,255,.86)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M800 1148 L800 1190" stroke="rgba(122,160,255,.86)" stroke-width="4" marker-end="url(#arrowBlue)"/>
+      <section class="stage">
+        <div class="stage-head">
+          <div>
+            <div class="stage-id">Stage 02</div>
+            <div class="stage-title">Design Convergence Loop</div>
+          </div>
+          <div class="stage-desc">第一组大回环：先聊成 design，再并行找问题、做技术评审、带问题回查，最终收敛出思路非常清晰的最终版 design。</div>
+        </div>
+        <div class="design-loop">
+          <div class="loop-box">
+            <div class="loop-label">Start</div>
+            <article class="node claude">
+              <h4>Brainstorm 初版 Design</h4>
+              <div class="meta"><span class="tag">Claude Code + Opus</span><span class="tag">初版 design</span></div>
+              <p>一句话需求先聊成一个可继续拆解、可继续评审的设计草案。</p>
+            </article>
+          </div>
 
-        <!-- design loop big ring -->
-        <path d="M500 182 C 350 182, 270 244, 270 304 C 270 354, 316 386, 402 386 L 1188 386 C 1286 386, 1332 344, 1332 282 C 1332 224, 1274 176, 1140 176"
-              fill="none" stroke="rgba(122,160,255,.88)" stroke-width="4.5" marker-end="url(#arrowBlue)"/>
-        <path d="M1168 360 C 1222 430, 1170 492, 1044 500" fill="none" stroke="rgba(255,127,156,.72)" stroke-width="3.6" marker-end="url(#arrowPink)"/>
-        <path d="M432 360 C 372 430, 414 496, 568 504" fill="none" stroke="rgba(255,182,108,.72)" stroke-width="3.6" marker-end="url(#arrowOrange)"/>
+          <div class="design-center">
+            <div class="loop-label">Loop Core</div>
+            <article class="node">
+              <h4>多路问题发现</h4>
+              <div class="meta"><span class="tag">并行</span><span class="tag">Review Cluster</span></div>
+              <ul>
+                <li>多个 agent review</li>
+                <li>Human review</li>
+                <li>同事飞书评论</li>
+                <li>带 design 探索其他服务代码</li>
+              </ul>
+            </article>
+            <div class="arrow-row">↓</div>
+            <article class="node human">
+              <h4>评论整合与逐条讨论</h4>
+              <div class="meta"><span class="tag">Human ↔ Agent</span></div>
+              <p>agent 先汇总评论，再和人逐条讨论，解决完一批就更新一次 design。</p>
+            </article>
+            <div class="arrow-row">↓</div>
+            <article class="node reviewer">
+              <h4>技术评审 / 新问题暴露</h4>
+              <div class="meta"><span class="tag">Tech Review</span><span class="tag">例：流量评估</span></div>
+              <p>现实约束与技术风险被显性提出，触发新一轮回查。</p>
+            </article>
+            <div class="arrow-row">↓</div>
+            <article class="node claude">
+              <h4>带问题继续找答案</h4>
+              <div class="meta"><span class="tag">Claude / Agent</span><span class="tag">再查证</span></div>
+              <p>把新问题变成进一步探索输入，再收回到 design。</p>
+            </article>
+          </div>
 
-        <!-- split to agents -->
-        <path d="M800 544 C 680 580, 560 626, 392 674" fill="none" stroke="rgba(122,160,255,.80)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M800 544 C 800 584, 800 624, 800 674" fill="none" stroke="rgba(122,160,255,.80)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M800 544 C 920 580, 1040 626, 1208 674" fill="none" stroke="rgba(122,160,255,.80)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M800 544 C 1090 560, 1290 584, 1406 620" fill="none" stroke="rgba(241,199,110,.70)" stroke-width="3.6" stroke-dasharray="10 9" marker-end="url(#arrowOrange)"/>
+          <div class="loop-box">
+            <div class="loop-label">Output</div>
+            <article class="node claude">
+              <h4>最终版 Design</h4>
+              <div class="meta"><span class="tag">清晰思路</span><span class="tag">稳定起点</span></div>
+              <p>代码不多，但路线、边界、约束已经清楚，可以进入跨仓任务拆解。</p>
+            </article>
+            <div class="tiny-note">Loop A：design → 多路找问题 → 逐条讨论 → 技术评审 / 新问题 → 带问题继续找答案 → 更新 design → 再循环</div>
+          </div>
+        </div>
+      </section>
 
-        <!-- plan loops 3 -->
-        <path d="M248 694 C 186 740, 182 834, 252 876 C 314 910, 382 898, 444 854" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="4" marker-end="url(#arrowPink)"/>
-        <path d="M648 694 C 586 740, 582 834, 652 876 C 714 910, 782 898, 844 854" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="4" marker-end="url(#arrowPink)"/>
-        <path d="M1048 694 C 986 740, 982 834, 1052 876 C 1114 910, 1182 898, 1244 854" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="4" marker-end="url(#arrowPink)"/>
+      <section class="stage">
+        <div class="stage-head">
+          <div>
+            <div class="stage-id">Stage 03</div>
+            <div class="stage-title">Agent / Task Split</div>
+          </div>
+          <div class="stage-desc">从 design 收敛切换到执行编排：跨仓设计被拆成多个执行单元，不只按 repo 拆，也按专项能力拆，同时保留 human manual execution。</div>
+        </div>
+        <div class="split-grid">
+          <article class="node claude">
+            <h4>跨仓任务拆解</h4>
+            <div class="meta"><span class="tag">Claude Code</span><span class="tag">agent split</span></div>
+            <p>把 design 变成可并行推进的任务图。</p>
+          </article>
+          <article class="node claude">
+            <h4>Repo Agent A</h4>
+            <div class="meta"><span class="tag">Repo-based</span></div>
+            <p>一个仓库的一整套 plan / impl / review loop。</p>
+          </article>
+          <article class="node claude">
+            <h4>Repo Agent B</h4>
+            <div class="meta"><span class="tag">Repo-based</span></div>
+            <p>另一个仓库上的对应 loop。</p>
+          </article>
+          <article class="node codex">
+            <h4>Rule Engine Config Agent</h4>
+            <div class="meta"><span class="tag">Capability-based</span></div>
+            <p>横切的规则配置任务，不简单归属某一个 repo。</p>
+          </article>
+        </div>
+        <div class="center-col" style="margin-top:12px; max-width:520px;">
+          <article class="node human">
+            <h4>Human Manual Task</h4>
+            <div class="meta"><span class="tag">Web / Login / Confirm</span><span class="tag">Manual Executor</span></div>
+            <p>有些任务不会交给 agent，而由人亲自做，例如网页操作、登录、点击、确认等。</p>
+          </article>
+        </div>
+      </section>
 
-        <!-- gates to impl loop -->
-        <path d="M340 912 L340 956" stroke="rgba(255,127,156,.9)" stroke-width="4" marker-end="url(#arrowPink)"/>
-        <path d="M740 912 L740 956" stroke="rgba(255,127,156,.9)" stroke-width="4" marker-end="url(#arrowPink)"/>
-        <path d="M1140 912 L1140 956" stroke="rgba(255,127,156,.9)" stroke-width="4" marker-end="url(#arrowPink)"/>
+      <section class="stage">
+        <div class="stage-head">
+          <div>
+            <div class="stage-id">Stage 04</div>
+            <div class="stage-title">Agent Plan Loops</div>
+          </div>
+          <div class="stage-desc">每个 agent 在进入实现前，都会先跑一套 plan 回环。reviewer 不只是提建议，而是阶段出口判断者。</div>
+        </div>
+        <div class="parallel-agents">
+          <div class="agent-loop">
+            <div class="agent-name"><strong>Repo Agent A</strong><span class="tag">Loop B</span></div>
+            <article class="node claude"><h4>Claude Code Plan</h4><p>先出 plan。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node codex"><h4>Codex Review</h4><p>异构 review。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node human"><h4>不接受点 ↔ 人机讨论</h4><p>planner 提出不接受点，和人讨论，修正 plan。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node reviewer"><h4>Reviewer Gate</h4><p>是否过关，由 reviewer 判断。</p></article>
+            <div class="arc">回环：plan → review → 分歧讨论 → 修正 → 再 review</div>
+          </div>
 
-        <!-- implementation loops -->
-        <path d="M208 974 C 150 1018, 150 1092, 214 1122 C 272 1150, 342 1138, 402 1092" fill="none" stroke="rgba(94,213,146,.88)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M608 974 C 550 1018, 550 1092, 614 1122 C 672 1150, 742 1138, 802 1092" fill="none" stroke="rgba(94,213,146,.88)" stroke-width="4" marker-end="url(#arrowBlue)"/>
-        <path d="M1008 974 C 950 1018, 950 1092, 1014 1122 C 1072 1150, 1142 1138, 1202 1092" fill="none" stroke="rgba(94,213,146,.88)" stroke-width="4" marker-end="url(#arrowBlue)"/>
+          <div class="agent-loop">
+            <div class="agent-name"><strong>Repo Agent B</strong><span class="tag">Loop B</span></div>
+            <article class="node claude"><h4>Claude Code Plan</h4><p>同样先 plan。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node codex"><h4>Codex Review</h4><p>review 是否合理。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node human"><h4>不接受点 ↔ 人机讨论</h4><p>对 review 结果做分歧讨论。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node reviewer"><h4>Reviewer Gate</h4><p>通过则进入实现。</p></article>
+            <div class="arc">回环不是人拍板，也不是 planner 自己说了算，而是 reviewer 作为出口闸门。</div>
+          </div>
 
-        <!-- gather to global reviewer -->
-        <path d="M404 1092 C 512 1140, 620 1160, 706 1166" fill="none" stroke="rgba(255,127,156,.88)" stroke-width="4" marker-end="url(#arrowPink)"/>
-        <path d="M804 1092 C 820 1140, 828 1158, 836 1164" fill="none" stroke="rgba(255,127,156,.88)" stroke-width="4" marker-end="url(#arrowPink)"/>
-        <path d="M1204 1092 C 1096 1140, 988 1160, 902 1166" fill="none" stroke="rgba(255,127,156,.88)" stroke-width="4" marker-end="url(#arrowPink)"/>
+          <div class="agent-loop">
+            <div class="agent-name"><strong>Rule Engine Config Agent</strong><span class="tag">Loop B</span></div>
+            <article class="node claude"><h4>Claude Code Plan</h4><p>专项能力任务先 plan。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node codex"><h4>Codex Review</h4><p>review 可行性与边界。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node human"><h4>不接受点 ↔ 人机讨论</h4><p>把 planner 不接受的部分拿出来讨论。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node reviewer"><h4>Reviewer Gate</h4><p>通过则直接 coding。</p></article>
+            <div class="arc">三组 loop 并排存在，但结构相似，便于形成稳定编排。</div>
+          </div>
+        </div>
+      </section>
 
-        <!-- global reviewer loop -->
-        <path d="M612 1184 C 560 1218, 570 1260, 666 1266 L 960 1266 C 1060 1266, 1070 1218, 1016 1180" fill="none" stroke="rgba(122,160,255,.86)" stroke-width="4" marker-end="url(#arrowBlue)"/>
+      <section class="stage">
+        <div class="stage-head">
+          <div>
+            <div class="stage-id">Stage 05</div>
+            <div class="stage-title">Implementation Loops → Global Reviewer</div>
+          </div>
+          <div class="stage-desc">reviewer 放行后，agent 直接进入实现；实现本身又形成第二组回环。单 agent 局部收敛后，再汇总到一个更高层的 global reviewer。</div>
+        </div>
+        <div class="parallel-agents">
+          <div class="agent-loop">
+            <div class="agent-name"><strong>Impl Loop A</strong><span class="tag">Codex Coding</span></div>
+            <article class="node codex"><h4>New Codex Coding Session</h4><p>新开 Codex session 专门写代码。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node"><h4>Parallel Reviews</h4><p>2 Claude Code + 1 Codex + 2 Mira 并行审查。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node codex"><h4>Coder Summarizes Reviews</h4><p>写代码的 session 统一汇总 review。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node codex"><h4>Rebut / Accept / Modify</h4><p>通过反驳机制吸收或拒绝意见，再修正代码。</p></article>
+            <div class="arc">Loop C：coding → parallel review → summarize → rebut / accept → revise → review again</div>
+          </div>
+          <div class="agent-loop">
+            <div class="agent-name"><strong>Impl Loop B</strong><span class="tag">Same Pattern</span></div>
+            <article class="node codex"><h4>New Coding Session</h4><p>另一个 agent 同样进入 coding loop。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node"><h4>Parallel Reviews</h4><p>同样拉起多 reviewer 阵列。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node codex"><h4>Summarize & Iterate</h4><p>汇总后再反驳或修正。</p></article>
+            <div class="arc">局部都能形成自己的实现回环。</div>
+          </div>
+          <div class="agent-loop">
+            <div class="agent-name"><strong>Impl Loop C</strong><span class="tag">Same Pattern</span></div>
+            <article class="node codex"><h4>New Coding Session</h4><p>专项能力任务也进入 coding loop。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node"><h4>Parallel Reviews</h4><p>多 reviewer 一起看。</p></article>
+            <div class="arrow-row">↓</div>
+            <article class="node codex"><h4>Summarize & Iterate</h4><p>统一通过 coder 继续迭代。</p></article>
+            <div class="arc">局部收敛 ≠ 全局收敛。</div>
+          </div>
+        </div>
+        <div class="global-wrap" style="margin-top:16px;">
+          <div class="node"><h4>Agent A Output</h4><p>局部结果</p></article></div>
+          <div class="global-center">
+            <article class="node reviewer">
+              <h4>Global Reviewer</h4>
+              <div class="meta"><span class="tag">整体看三个 agent</span><span class="tag">System-level</span></div>
+              <p>站在整体视角检查跨 agent 的边界问题、拼接问题与系统级问题，再继续跑几轮整体 reviewer 回环。</p>
+            </article>
+            <div class="tiny-note">Loop D：局部都收敛，不代表整体收敛。Global Reviewer 专门负责全局视角的再收敛。</div>
+          </div>
+          <div class="node"><h4>Agent B / C Outputs</h4><p>汇总后进入整体 reviewer</p></div>
+        </div>
+      </section>
 
-        <!-- verification router returns -->
-        <path d="M892 1238 C 1026 1208, 1120 1168, 1120 1110" fill="none" stroke="rgba(255,182,108,.94)" stroke-width="4" stroke-dasharray="10 9" marker-end="url(#arrowOrange)"/>
-        <path d="M786 1242 C 660 1208, 580 1164, 580 1110" fill="none" stroke="rgba(255,182,108,.94)" stroke-width="4" stroke-dasharray="10 9" marker-end="url(#arrowOrange)"/>
-        <path d="M716 1238 C 486 1172, 340 1076, 340 904" fill="none" stroke="rgba(255,182,108,.80)" stroke-width="3.6" stroke-dasharray="9 8" marker-end="url(#arrowOrange)"/>
-        <path d="M658 1230 C 376 1150, 248 946, 286 364" fill="none" stroke="rgba(255,182,108,.58)" stroke-width="3.2" stroke-dasharray="8 8" marker-end="url(#arrowOrange)"/>
-      </svg>
+      <section class="stage">
+        <div class="stage-head">
+          <div>
+            <div class="stage-id">Stage 06</div>
+            <div class="stage-title">Verification / Conditional Return</div>
+          </div>
+          <div class="stage-desc">整体 reviewer 放行之后，不会停在 review，而是进入真实验证层。验证失败时，问题不会固定回到某一层，而是按问题性质路由回去。</div>
+        </div>
+        <div class="return-grid">
+          <article class="node claude">
+            <h4>Integration</h4>
+            <div class="meta"><span class="tag">联调</span></div>
+            <p>跨 agent 成果开始真正拼接。</p>
+          </article>
+          <article class="node claude">
+            <h4>Testing</h4>
+            <div class="meta"><span class="tag">测试</span></div>
+            <p>验证行为是否符合预期。</p>
+          </article>
+          <article class="node claude">
+            <h4>Real Run Validation</h4>
+            <div class="meta"><span class="tag">实跑验证</span></div>
+            <p>真正把系统跑起来看是否闭环。</p>
+          </article>
+          <article class="node router">
+            <h4>Conditional Return Router</h4>
+            <div class="meta"><span class="tag">按问题性质回流</span></div>
+            <p>问题可能回到实现 agent、Global Reviewer、planner，必要时甚至回到 design 层。</p>
+          </article>
+        </div>
+        <div class="tiny-note">这里的核心不是“测试通过/失败”二元，而是一个条件分流的多层回流系统。</div>
+      </section>
+    </div>
 
-      <div class="labels">
-        <div class="label" style="left:60px;top:58px;">Demand</div>
-        <div class="label" style="left:60px;top:182px;">Design Convergence Loop</div>
-        <div class="label" style="left:60px;top:392px;">Agent / Task Split</div>
-        <div class="label" style="left:60px;top:598px;">Agent Plan Loops</div>
-        <div class="label" style="left:60px;top:930px;">Implementation Loops</div>
-        <div class="label" style="left:60px;top:1178px;">Global Reviewer + Verification</div>
-        <div class="label" style="left:1368px;top:184px;">Loop A</div>
-        <div class="label" style="left:1368px;top:682px;">Loop B × 3</div>
-        <div class="label" style="left:1368px;top:992px;">Loop C × 3</div>
-
-        <div class="node human" style="left:692px;top:72px;width:220px;">
-          <h4>一句话需求</h4>
-          <div class="meta"><span class="tag">Start</span></div>
-          <p>整个流程的起点。</p>
-        </div>
-
-        <div class="node claude" style="left:292px;top:192px;width:260px;">
-          <h4>Brainstorm 初版 Design</h4>
-          <div class="meta"><span class="tag">Claude Code + Opus</span></div>
-          <p>先把一句话需求聊成初版 design。</p>
-        </div>
-        <div class="node" style="left:616px;top:178px;width:334px;">
-          <h4>多路问题发现</h4>
-          <div class="meta"><span class="tag">agent review / human review / 同事评论 / 探索其他服务代码</span></div>
-          <p>围绕初版 design 并行找问题、找缺口、找风险。</p>
-        </div>
-        <div class="node human" style="left:620px;top:286px;width:284px;">
-          <h4>整合评论并逐条讨论</h4>
-          <div class="meta"><span class="tag">Human ↔ Agent</span></div>
-          <p>agent 汇总评论，和人逐条讨论怎么解，更新 design。</p>
-        </div>
-        <div class="node reviewer" style="left:988px;top:194px;width:250px;">
-          <h4>技术评审 / 新问题暴露</h4>
-          <div class="meta"><span class="tag">例：现有存储流量评估</span></div>
-          <p>技术评审会带出新的现实约束和技术风险。</p>
-        </div>
-        <div class="node claude small" style="left:1036px;top:302px;width:174px;">
-          <h4>带问题继续找答案</h4>
-          <p>把新问题带回去继续查证。</p>
-        </div>
-        <div class="node claude" style="left:1264px;top:224px;width:250px;">
-          <h4>最终版 Design</h4>
-          <div class="meta"><span class="tag">思路非常清晰</span></div>
-          <p>不是代码很多，而是方向、边界、约束足够清楚。</p>
-        </div>
-
-        <div class="node claude" style="left:686px;top:414px;width:228px;">
-          <h4>跨仓任务拆解</h4>
-          <div class="meta"><span class="tag">Repo + Capability</span></div>
-          <p>因为 design 跨多个仓库，所以开始拆 agent / 拆任务。</p>
-        </div>
-        <div class="node small claude" style="left:184px;top:600px;width:170px;">
-          <h4>Repo Agent A</h4>
-          <p>按仓库拆</p>
-        </div>
-        <div class="node small claude" style="left:584px;top:600px;width:170px;">
-          <h4>Repo Agent B</h4>
-          <p>按仓库拆</p>
-        </div>
-        <div class="node small codex" style="left:984px;top:600px;width:220px;">
-          <h4>Rule Engine Config Agent</h4>
-          <p>按专项能力拆</p>
-        </div>
-        <div class="node small human" style="left:1320px;top:598px;width:180px;">
-          <h4>Human Manual Task</h4>
-          <p>web / 登录 / 点击 / 确认</p>
-        </div>
-
-        <div class="node claude" style="left:208px;top:700px;width:264px;">
-          <h4>Agent Loop A：Plan 回环</h4>
-          <div class="meta"><span class="tag">Claude plan → Codex review → 不接受点 → 人机讨论 → 修正 plan → reviewer 判断</span></div>
-          <p>每个 agent 先形成一套 plan 回环，reviewer 决定是否过关。</p>
-        </div>
-        <div class="node claude" style="left:608px;top:700px;width:264px;">
-          <h4>Agent Loop B：Plan 回环</h4>
-          <div class="meta"><span class="tag">同样的回环结构</span></div>
-          <p>不同 agent 各自独立跑一套 plan / review / discussion loop。</p>
-        </div>
-        <div class="node claude" style="left:1008px;top:700px;width:264px;">
-          <h4>Agent Loop C：Plan 回环</h4>
-          <div class="meta"><span class="tag">reviewer 是质量闸门</span></div>
-          <p>不是 planner 自己决定是否继续，而是由 reviewer 判断。</p>
-        </div>
-
-        <div class="node codex" style="left:208px;top:980px;width:264px;">
-          <h4>Implementation Loop A</h4>
-          <div class="meta"><span class="tag">新 Codex session 写代码 → 多 reviewer 并行审查 → coder 汇总 → 反驳/吸收 → 修正代码</span></div>
-          <p>plan 过关后，agent 直接进入实现，并形成第二组回环。</p>
-        </div>
-        <div class="node codex" style="left:608px;top:980px;width:264px;">
-          <h4>Implementation Loop B</h4>
-          <div class="meta"><span class="tag">同样是 coding / review / rebut / modify</span></div>
-          <p>单个 agent 内部的实现回环独立收敛。</p>
-        </div>
-        <div class="node codex" style="left:1008px;top:980px;width:264px;">
-          <h4>Implementation Loop C</h4>
-          <div class="meta"><span class="tag">局部收敛</span></div>
-          <p>但局部都收敛，不代表整体收敛。</p>
-        </div>
-
-        <div class="node reviewer" style="left:670px;top:1188px;width:260px;">
-          <h4>Global Reviewer</h4>
-          <div class="meta"><span class="tag">整体看三个 agent</span></div>
-          <p>从系统整体视角看三个 agent 的结果，再回环几轮，主要检测跨 agent 的整体问题。</p>
-        </div>
-        <div class="node router" style="left:980px;top:1188px;width:300px;">
-          <h4>Verification / Conditional Return</h4>
-          <div class="meta"><span class="tag">联调 / 测试 / 实跑验证</span><span class="tag">按问题性质回流</span></div>
-          <p>验证阶段发现问题时，可能回到实现 agent、global reviewer、planner，必要时甚至回到 design 层。</p>
-        </div>
-      </div>
-    </section>
-
-    <div class="footer"><b>这版变化：</b> 节点改成椭圆 / 胶囊形，同时把之前省掉的关键内容补回来了。主图里现在保留了三层真正重要的回环：<b>Design Loop、三个 Agent Plan Loop、三个 Implementation Loop + Global Reviewer</b>，最后再通过 <b>Verification / Conditional Return</b> 把问题按性质回流。</div>
+    <div class="footer">
+      这是一版重做后的单 HTML 原型：已经刻意砍掉“卡片墙”感觉，改成系统编排图式，把顺序、loop、汇总与回流放在第一位。下一轮如果继续改，可以进一步把连接线用 SVG 明确画出来，让回环和汇总关系更显眼。
+    </div>
   </div>
 </body>
 </html>
