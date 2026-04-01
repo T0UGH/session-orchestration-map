@@ -228,10 +228,11 @@
     .agent-loop .arc {
       border: 1px dashed rgba(255,255,255,.16);
       border-radius: 26px;
-      padding: 10px;
-      margin-top: 10px;
-      color: #c8d6f6;
-      font-size: 12px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      color: #d4e0fb;
+      font-size: 14px;
+      line-height: 1.45;
     }
 
     .agent-name {
@@ -271,32 +272,44 @@
     }
 
     .tiny-note {
-      margin-top: 10px; color: #c1cff0; font-size: 12px;
-      border: 1px dashed rgba(255,255,255,.12); border-radius: 14px; padding: 10px 12px;
+      margin-top: 12px; color: #d0dcf7; font-size: 13px;
+      line-height: 1.5;
+      border: 1px dashed rgba(255,255,255,.12); border-radius: 16px; padding: 12px 14px;
       background: rgba(255,255,255,.025);
     }
 
     .microloop{
       position:relative;
-      margin-top:10px;
-      padding:12px;
+      margin-top:12px;
+      padding:16px;
       border:1px dashed rgba(255,255,255,.14);
-      border-radius:22px;
+      border-radius:24px;
       background:rgba(255,255,255,.02);
-      min-height:152px;
+      min-height:178px;
       overflow:hidden;
     }
-    .microloop svg{width:100%;height:140px;display:block}
+    .microloop svg{width:100%;height:150px;display:block}
     .microloop .cap{
       position:absolute;
-      padding:4px 8px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:34px;
+      padding:8px 14px;
       border-radius:999px;
-      background:rgba(8,17,31,.92);
-      border:1px solid rgba(255,255,255,.08);
-      font-size:10px;
-      color:#dce7ff;
+      background:rgba(10,20,36,.96);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 8px 18px rgba(0,0,0,.18);
+      font-size:12px;
+      font-weight:600;
+      line-height:1.2;
+      color:#edf3ff;
       white-space:nowrap;
     }
+    .microloop .cap.claude{ border-color: rgba(102,179,255,.42); }
+    .microloop .cap.codex{ border-color: rgba(95,213,148,.42); }
+    .microloop .cap.human{ border-color: rgba(241,199,110,.42); }
+    .microloop .cap.reviewer{ border-color: rgba(255,127,156,.42); }
     .footer {
       margin-top: 22px;
       background: rgba(14,27,48,.88);
@@ -398,10 +411,10 @@
                 <defs><marker id="mDesign" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(122,160,255,.85)"/></marker></defs>
                 <path d="M70 28 C 26 30, 14 66, 36 98 C 58 126, 114 128, 156 100 C 194 74, 236 66, 272 74 C 302 80, 308 44, 264 26 C 220 10, 144 8, 70 28" fill="none" stroke="rgba(122,160,255,.82)" stroke-width="3.5" marker-end="url(#mDesign)"/>
               </svg>
-              <div class="cap" style="left:16px;top:18px">多路找问题</div>
-              <div class="cap human" style="right:18px;top:24px">逐条讨论</div>
-              <div class="cap reviewer" style="right:28px;bottom:26px">技术评审 / 新问题</div>
-              <div class="cap claude" style="left:74px;bottom:18px">带问题回查 → 更新 design</div>
+              <div class="cap" style="left:12px;top:12px">多路找问题</div>
+              <div class="cap human" style="right:12px;top:18px">逐条讨论</div>
+              <div class="cap reviewer" style="right:18px;bottom:22px">技术评审 / 新问题</div>
+              <div class="cap claude" style="left:52px;bottom:10px">带问题回查 → 更新 design</div>
             </div>
             <div class="tiny-note">把 design 的核心循环直接画在模块内部，而不是只用文字说明它会循环。</div>
           </div>
@@ -473,10 +486,10 @@
                 <defs><marker id="mPlanA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,127,156,.9)"/></marker></defs>
                 <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="3.5" marker-end="url(#mPlanA)"/>
               </svg>
-              <div class="cap claude" style="left:18px;top:56px">plan</div>
-              <div class="cap codex" style="left:116px;top:12px">review</div>
-              <div class="cap human" style="right:20px;top:58px">不接受点 / 讨论</div>
-              <div class="cap reviewer" style="left:106px;bottom:14px">修正 → gate</div>
+              <div class="cap claude" style="left:10px;top:56px">plan</div>
+              <div class="cap codex" style="left:110px;top:8px">review</div>
+              <div class="cap human" style="right:10px;top:54px">不接受点 / 讨论</div>
+              <div class="cap reviewer" style="left:92px;bottom:8px">修正 → gate</div>
             </div>
             <div class="arc">每个 agent 内部，loop 本体就是：plan → review → 分歧讨论 → 修正 → reviewer 判断。</div>
           </div>
@@ -488,10 +501,10 @@
                 <defs><marker id="mPlanB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,127,156,.9)"/></marker></defs>
                 <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="3.5" marker-end="url(#mPlanB)"/>
               </svg>
-              <div class="cap claude" style="left:18px;top:56px">plan</div>
-              <div class="cap codex" style="left:116px;top:12px">review</div>
-              <div class="cap human" style="right:20px;top:58px">讨论</div>
-              <div class="cap reviewer" style="left:106px;bottom:14px">gate</div>
+              <div class="cap claude" style="left:10px;top:56px">plan</div>
+              <div class="cap codex" style="left:110px;top:8px">review</div>
+              <div class="cap human" style="right:10px;top:54px">讨论</div>
+              <div class="cap reviewer" style="left:110px;bottom:8px">gate</div>
             </div>
             <div class="arc">三个 agent 并排存在，但每个内部都是自己的一套小环。</div>
           </div>
@@ -503,10 +516,10 @@
                 <defs><marker id="mPlanC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,127,156,.9)"/></marker></defs>
                 <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="3.5" marker-end="url(#mPlanC)"/>
               </svg>
-              <div class="cap claude" style="left:18px;top:56px">plan</div>
-              <div class="cap codex" style="left:116px;top:12px">review</div>
-              <div class="cap human" style="right:20px;top:58px">讨论</div>
-              <div class="cap reviewer" style="left:106px;bottom:14px">gate</div>
+              <div class="cap claude" style="left:10px;top:56px">plan</div>
+              <div class="cap codex" style="left:110px;top:8px">review</div>
+              <div class="cap human" style="right:10px;top:54px">讨论</div>
+              <div class="cap reviewer" style="left:110px;bottom:8px">gate</div>
             </div>
             <div class="arc">这里不再只写文字，而是直接把 plan loop 画进模块内部。</div>
           </div>
@@ -529,10 +542,10 @@
                 <defs><marker id="mImplA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(94,213,148,.9)"/></marker></defs>
                 <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(94,213,148,.88)" stroke-width="3.5" marker-end="url(#mImplA)"/>
               </svg>
-              <div class="cap codex" style="left:18px;top:56px">coding</div>
-              <div class="cap" style="left:100px;top:12px">5 路 review</div>
-              <div class="cap codex" style="right:18px;top:58px">汇总 / 反驳</div>
-              <div class="cap codex" style="left:98px;bottom:14px">修正 → 再审</div>
+              <div class="cap codex" style="left:10px;top:56px">coding</div>
+              <div class="cap" style="left:92px;top:8px">5 路 review</div>
+              <div class="cap codex" style="right:10px;top:54px">汇总 / 反驳</div>
+              <div class="cap codex" style="left:86px;bottom:8px">修正 → 再审</div>
             </div>
             <div class="arc">实现阶段也不是线性推进，而是 coding / review / rebut / modify 的第二组回环。</div>
           </div>
@@ -543,10 +556,10 @@
                 <defs><marker id="mImplB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(94,213,148,.9)"/></marker></defs>
                 <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(94,213,148,.88)" stroke-width="3.5" marker-end="url(#mImplB)"/>
               </svg>
-              <div class="cap codex" style="left:18px;top:56px">coding</div>
-              <div class="cap" style="left:104px;top:12px">parallel review</div>
-              <div class="cap codex" style="right:18px;top:58px">汇总</div>
-              <div class="cap codex" style="left:100px;bottom:14px">modify</div>
+              <div class="cap codex" style="left:10px;top:56px">coding</div>
+              <div class="cap" style="left:90px;top:8px">parallel review</div>
+              <div class="cap codex" style="right:10px;top:54px">汇总</div>
+              <div class="cap codex" style="left:104px;bottom:8px">modify</div>
             </div>
             <div class="arc">三个 implementation 模块并排，各自独立成环。</div>
           </div>
@@ -557,10 +570,10 @@
                 <defs><marker id="mImplC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(94,213,148,.9)"/></marker></defs>
                 <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(94,213,148,.88)" stroke-width="3.5" marker-end="url(#mImplC)"/>
               </svg>
-              <div class="cap codex" style="left:18px;top:56px">coding</div>
-              <div class="cap" style="left:104px;top:12px">review</div>
-              <div class="cap codex" style="right:18px;top:58px">rebut</div>
-              <div class="cap codex" style="left:100px;bottom:14px">modify</div>
+              <div class="cap codex" style="left:10px;top:56px">coding</div>
+              <div class="cap" style="left:106px;top:8px">review</div>
+              <div class="cap codex" style="right:10px;top:54px">rebut</div>
+              <div class="cap codex" style="left:104px;bottom:8px">modify</div>
             </div>
             <div class="arc">局部都能形成实现回环，但后面还要汇总到更大的 reviewer。</div>
           </div>
