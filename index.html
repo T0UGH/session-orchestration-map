@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>大需求开发中的多 Session 编排图</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(16, 22, 44, 0.86);
+      --panel-2: rgba(20, 28, 54, 0.92);
+      --text: #e9eefc;
+      --muted: #9aa7c7;
+      --line: rgba(140, 164, 255, 0.18);
+      --line-strong: rgba(140, 164, 255, 0.42);
+      --claude: #5ca9ff;
+      --codex: #58d28f;
+      --mira: #b48cff;
+      --human: #f1c76e;
+      --gate: #ff7b93;
+      --warn: #ffb86b;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.34);
+      --radius: 18px;
+      --max: 1320px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(76, 110, 245, 0.16), transparent 34%),
+        radial-gradient(circle at 85% 12%, rgba(88, 210, 143, 0.08), transparent 26%),
+        linear-gradient(180deg, #0b1020 0%, #0d1326 100%);
+      line-height: 1.45;
+    }
+
+    .page {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .hero-card, .legend, .layer {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-card {
+      padding: 28px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(32px, 5vw, 52px);
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 840px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      font-size: 13px;
+      color: #d9e3ff;
+    }
+
+    .legend {
+      padding: 22px;
+    }
+
+    .legend h3, .section-title {
+      margin: 0 0 14px;
+      font-size: 15px;
+      color: #f4f7ff;
+      letter-spacing: 0.02em;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 20px;
+    }
+
+    .layer {
+      position: relative;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .layer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      opacity: 0.32;
+    }
+
+    .layer-head {
+      position: relative;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      z-index: 1;
+    }
+
+    .layer-kicker {
+      font-size: 12px;
+      color: var(--human);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .layer-desc {
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 720px;
+    }
+
+    .lane, .cluster {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 14px;
+    }
+
+    .lane.cols-1 { grid-template-columns: 1fr; }
+    .lane.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .lane.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .lane.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .node, .cluster {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: var(--radius);
+      padding: 16px;
+      min-height: 116px;
+      position: relative;
+    }
+
+    .node.agent::after,
+    .node.human::after,
+    .node.gate::after,
+    .node.router::after,
+    .node.global::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 18px 18px 0 0;
+    }
+
+    .node.agent.claude::after { background: var(--claude); }
+    .node.agent.codex::after { background: var(--codex); }
+    .node.agent.mira::after { background: var(--mira); }
+    .node.human::after { background: var(--human); }
+    .node.gate::after { background: var(--gate); }
+    .node.global::after { background: linear-gradient(90deg, var(--gate), var(--warn)); }
+    .node.router::after { background: linear-gradient(90deg, var(--warn), var(--human)); }
+
+    .node-title {
+      margin: 0 0 8px;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .node-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #d7def7;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .tag small { color: var(--muted); }
+
+    .node p, .node li, .cluster li, .cluster p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .node ul, .cluster ul {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .cluster-title {
+      font-size: 14px;
+      margin: 0 0 10px;
+      color: #f2f6ff;
+    }
+
+    .flow-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #b7c2df;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed var(--line-strong);
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .arrow-down {
+      position: relative;
+      width: 2px;
+      height: 28px;
+      background: linear-gradient(180deg, rgba(140,164,255,0.08), rgba(140,164,255,0.58));
+      margin: 8px auto 2px;
+    }
+
+    .arrow-down::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -4px;
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(140,164,255,0.72);
+      border-bottom: 2px solid rgba(140,164,255,0.72);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .loop-callout {
+      margin-top: 10px;
+      border: 1px dashed rgba(255,255,255,0.14);
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: #c8d3ef;
+      font-size: 12px;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1120px) {
+      .hero { grid-template-columns: 1fr; }
+      .lane.cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 860px) {
+      .page { padding: 24px 14px 40px; }
+      .lane.cols-2, .lane.cols-3, .lane.cols-4 { grid-template-columns: 1fr; }
+      .legend-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="layer-kicker">Human-Controlled Multi-Session Orchestration</div>
+        <h1>一个大需求如何被拆成多 Session 推进</h1>
+        <div class="subtitle">
+          这不是抽象方法论海报，而是一张来自真实实践的编排图：人作为主控，把跨仓大需求拆成多个 session，交给 Claude Code、Codex、Mira 与人工步骤共同推进，并在多层 review、实现和验证回环中逐步收敛。
+        </div>
+        <div class="meta">
+          <span class="pill">展示型网页</span>
+          <span class="pill">专业系统图风</span>
+          <span class="pill">Session 是主角</span>
+          <span class="pill">中等信息密度</span>
+          <span class="pill">并行 + 回环 + 条件回流</span>
+        </div>
+      </div>
+      <aside class="legend">
+        <h3>图例 / Visual Encoding</h3>
+        <div class="legend-grid">
+          <div class="legend-item"><span class="dot" style="background: var(--claude)"></span>Claude Code</div>
+          <div class="legend-item"><span class="dot" style="background: var(--codex)"></span>Codex</div>
+          <div class="legend-item"><span class="dot" style="background: var(--mira)"></span>Mira</div>
+          <div class="legend-item"><span class="dot" style="background: var(--human)"></span>Human / Manual</div>
+          <div class="legend-item"><span class="dot" style="background: var(--gate)"></span>Reviewer Gate</div>
+          <div class="legend-item"><span class="dot" style="background: var(--warn)"></span>Conditional Return</div>
+        </div>
+        <div class="footer-note" style="margin-top:16px">
+          人在这张图里既是 <b>controller</b>，也是 <b>manual executor</b>。并非所有任务都被 agent 接管：登录、点击、确认、部分 web 操作依旧由人来补位。
+        </div>
+      </aside>
+    </section>
+
+    <main class="timeline">
+      <section class="layer">
+        <div class="layer-head">
+          <div>
+            <div class="layer-kicker">Layer 1</div>
+            <div class="section-title">Demand / Intent</div>
+          </div>
+          <div class="layer-desc">最上层只保留起点：一句话需求。后续所有 session 都从这里展开。</div>
+        </div>
+        <div class="lane cols-1">
+          <article class="node human">
+            <h3 class="node-title">一句话需求</h3>
+            <div class="node-meta">
+              <span class="tag">Origin</span>
+              <span class="tag">Human <small>goal framing</small></span>
+            </div>
+            <p>从一个简短目标开始，不直接写代码，先进入 design 收敛阶段。</p>
+          </article>
+        </div>
+        <div class="arrow-down"></div>
+      </section>
+
+      <section class="layer">
+        <div class="layer-head">
+          <div>
+            <div class="layer-kicker">Layer 2</div>
+            <div class="section-title">Design Convergence Loop</div>
+          </div>
+          <div class="layer-desc">第一组大回环：从一句话需求出发，经 brainstorm、评论整合、技术评审、带问题回查，最后收敛成最终版 design。</div>
+        </div>
+        <div class="lane cols-3">
+          <article class="node agent claude">
+            <h3 class="node-title">Brainstorm 初版 Design</h3>
+            <div class="node-meta">
+              <span class="tag">Claude Code</span>
+              <span class="tag">Opus</span>
+              <span class="tag">产出：初版 design</span>
+            </div>
+            <p>多轮 chat，把一句话需求收敛成一个可继续拆解、可继续评审的设计草案。</p>
+          </article>
+
+          <article class="cluster">
+            <h3 class="cluster-title">多路问题发现</h3>
+            <ul>
+              <li>多个 agent review design</li>
+              <li>Human 自己 review</li>
+              <li>同事在飞书文档评论</li>
+              <li>agent 带着初稿探索其他服务代码找问题</li>
+            </ul>
+            <div class="flow-note">并行展开</div>
+          </article>
+
+          <article class="node human">
+            <h3 class="node-title">评论整合与逐条讨论</h3>
+            <div class="node-meta">
+              <span class="tag">Human + Agent</span>
+              <span class="tag">产出：修订方向</span>
+            </div>
+            <p>agent 先汇总评论，再和人逐条讨论问题怎么解，解决完一批就更新一次 design。</p>
+          </article>
+        </div>
+        <div class="lane cols-3" style="margin-top:14px">
+          <article class="node gate">
+            <h3 class="node-title">技术评审</h3>
+            <div class="node-meta">
+              <span class="tag">Tech Review</span>
+              <span class="tag">例：流量评估</span>
+            </div>
+            <p>进入现实约束与技术风险检查，会继续暴露新的问题。</p>
+          </article>
+          <article class="node agent claude">
+            <h3 class="node-title">带问题继续找答案</h3>
+            <div class="node-meta">
+              <span class="tag">Claude / Agent</span>
+              <span class="tag">产出：新答案</span>
+            </div>
+            <p>带着技术评审提出的新问题继续探索，把查证结果重新收进 design。</p>
+          </article>
+          <article class="node agent claude">
+            <h3 class="node-title">最终版 Design</h3>
+            <div class="node-meta">
+              <span class="tag">Final Design</span>
+              <span class="tag">产出：清晰思路</span>
+            </div>
+            <p>代码不一定多，但思路已经非常清晰，可作为后续 plan / implementation 的稳定起点。</p>
+          </article>
+        </div>
+        <div class="loop-callout">Loop A：design → 多路找问题 → 逐条讨论 → 技术评审 / 新问题 → 带问题继续找答案 → 更新 design → 再循环</div>
+        <div class="arrow-down"></div>
+      </section>
+
+      <section class="layer">
+        <div class="layer-head">
+          <div>
+            <div class="layer-kicker">Layer 3</div>
+            <div class="section-title">Agent / Task Split</div>
+          </div>
+          <div class="layer-desc">从 design 收敛切换到执行编排：跨仓设计被拆成多个执行单元，不只按 repo 拆，也按专项能力拆，同时承认有些任务必须由人亲自做。</div>
+        </div>
+        <div class="lane cols-4">
+          <article class="node agent claude">
+            <h3 class="node-title">跨仓任务拆解</h3>
+            <div class="node-meta">
+              <span class="tag">Claude Code</span>
+              <span class="tag">产出：agent split</span>
+            </div>
+            <p>把最终版 design 变成可并行执行的任务图：仓库维度 + 能力维度混合拆分。</p>
+          </article>
+          <article class="node agent claude">
+            <h3 class="node-title">Repo Agent A</h3>
+            <div class="node-meta">
+              <span class="tag">Repo-based</span>
+              <span class="tag">Session Cluster</span>
+            </div>
+            <p>围绕某个仓库的实现与 review 回环。</p>
+          </article>
+          <article class="node agent claude">
+            <h3 class="node-title">Repo Agent B</h3>
+            <div class="node-meta">
+              <span class="tag">Repo-based</span>
+              <span class="tag">Session Cluster</span>
+            </div>
+            <p>另一个仓库上的对应执行单元。</p>
+          </article>
+          <article class="node agent codex">
+            <h3 class="node-title">Rule Engine Config Agent</h3>
+            <div class="node-meta">
+              <span class="tag">Capability-based</span>
+              <span class="tag">横切任务</span>
+            </div>
+            <p>单独处理规则引擎配置，不简单归属于某一个 repo。</p>
+          </article>
+        </div>
+        <div class="lane cols-1" style="margin-top:14px">
+          <article class="node human">
+            <h3 class="node-title">Human Manual Task</h3>
+            <div class="node-meta">
+              <span class="tag">Manual Web Operation</span>
+              <span class="tag">Human Executor</span>
+            </div>
+            <p>一些需要登录、点击、确认、网页操作的步骤不交给 agent，而由人直接承接。</p>
+          </article>
+        </div>
+        <div class="arrow-down"></div>
+      </section>
+
+      <section class="layer">
+        <div class="layer-head">
+          <div>
+            <div class="layer-kicker">Layer 4</div>
+            <div class="section-title">Agent Plan Loops</div>
+          </div>
+          <div class="layer-desc">每个 agent 都不是接任务直接开干，而是先跑一套 plan / review 小回环。reviewer 不只是提建议，而是阶段出口判断者。</div>
+        </div>
+        <div class="lane cols-3">
+          <article class="node agent claude">
+            <h3 class="node-title">Claude Code Plan</h3>
+            <div class="node-meta">
+              <span class="tag">Planner</span>
+              <span class="tag">产出：plan</span>
+            </div>
+            <p>每个执行单元先用 Claude Code 出一版 plan，而不是直接实现。</p>
+          </article>
+          <article class="node agent codex">
+            <h3 class="node-title">Codex Review Plan</h3>
+            <div class="node-meta">
+              <span class="tag">Reviewer</span>
+              <span class="tag">异构 review</span>
+            </div>
+            <p>由 Codex 来 review plan，形成和 planner 不同的视角。</p>
+          </article>
+          <article class="node human">
+            <h3 class="node-title">Planner 不接受点 ↔ 人机讨论</h3>
+            <div class="node-meta">
+              <span class="tag">Human in the Loop</span>
+              <span class="tag">产出：修正版 plan</span>
+            </div>
+            <p>planner 会明确说哪些不接受，再和人讨论这些分歧，讨论后修正 plan 并继续回环。</p>
+          </article>
+        </div>
+        <div class="lane cols-2" style="margin-top:14px">
+          <article class="node agent claude">
+            <h3 class="node-title">Plan Revision</h3>
+            <div class="node-meta">
+              <span class="tag">迭代修正</span>
+            </div>
+            <p>不是一次性 review，而是多轮 plan 修正与再 review。</p>
+          </article>
+          <article class="node gate">
+            <h3 class="node-title">Reviewer Gate</h3>
+            <div class="node-meta">
+              <span class="tag">Codex decides</span>
+              <span class="tag">出口判断</span>
+            </div>
+            <p>是否收敛、是否可以继续往下走，由 reviewer 判断，而不是 planner 单独决定。</p>
+          </article>
+        </div>
+        <div class="loop-callout">Loop B：Claude Code plan → Codex review → planner 说哪些不接受 → 人与 planner 讨论 → 修正 plan → reviewer 判断是否放行</div>
+        <div class="arrow-down"></div>
+      </section>
+
+      <section class="layer">
+        <div class="layer-head">
+          <div>
+            <div class="layer-kicker">Layer 5</div>
+            <div class="section-title">Implementation Loop + Global Reviewer</div>
+          </div>
+          <div class="layer-desc">reviewer 放行后，agent 直接进入实现。但实现本身又形成第二组回环；单 agent 局部收敛后，还要进入更高层的整体 reviewer 回环。</div>
+        </div>
+
+        <div class="lane cols-2">
+          <article class="stack">
+            <div class="node agent codex">
+              <h3 class="node-title">New Codex Coding Session</h3>
+              <div class="node-meta">
+                <span class="tag">Codex</span>
+                <span class="tag">产出：代码实现</span>
+              </div>
+              <p>进入实现时，会新开一个 Codex session 专门写代码。</p>
+            </div>
+            <div class="node agent codex">
+              <h3 class="node-title">Coder Summarizes Reviews</h3>
+              <div class="node-meta">
+                <span class="tag">汇总 review</span>
+                <span class="tag">反驳机制</span>
+              </div>
+              <p>写代码的 Codex session 负责汇总 review，并决定吸收哪些意见、反驳哪些意见，再继续修正代码。</p>
+            </div>
+          </article>
+
+          <article class="cluster">
+            <h3 class="cluster-title">Parallel Review Cluster</h3>
+            <ul>
+              <li>Claude Code Review 1</li>
+              <li>Claude Code Review 2</li>
+              <li>Codex Review</li>
+              <li>Mira Review 1</li>
+              <li>Mira Review 2</li>
+            </ul>
+            <div class="flow-note">5 路 reviewer 并行审查</div>
+          </article>
+        </div>
+
+        <div class="lane cols-2" style="margin-top:14px">
+          <article class="node agent codex">
+            <h3 class="node-title">Code Revision</h3>
+            <div class="node-meta">
+              <span class="tag">吸收 / 反驳 / 修正</span>
+            </div>
+            <p>不是 review 来一条改一条，而是 coder 统一处理，再决定如何进入下一轮。</p>
+          </article>
+          <article class="node global">
+            <h3 class="node-title">Global Reviewer</h3>
+            <div class="node-meta">
+              <span class="tag">System-level</span>
+              <span class="tag">整体看三个 agent</span>
+            </div>
+            <p>局部收敛后，还要站在整体视角检查三个 agent 的结果能否拼起来，继续跑整体级回环。</p>
+          </article>
+        </div>
+
+        <div class="loop-callout">Loop C：新 Codex session 写代码 → 多 reviewer 并行审查 → coder 汇总 → 反驳 / 吸收 → 修正代码 → 再循环</div>
+        <div class="loop-callout">Loop D：跨 agent 的整体 reviewer 从全局视角继续回环，专门检测边界问题、系统级问题、局部正确但全局不成立的问题。</div>
+        <div class="arrow-down"></div>
+      </section>
+
+      <section class="layer">
+        <div class="layer-head">
+          <div>
+            <div class="layer-kicker">Layer 6</div>
+            <div class="section-title">Verification / Conditional Return</div>
+          </div>
+          <div class="layer-desc">整体 reviewer 放行之后，流程还不会停在 review，而是进入真实验证层。发现问题时，不是固定回到某一层，而是按问题性质回流。</div>
+        </div>
+        <div class="lane cols-4">
+          <article class="node agent claude">
+            <h3 class="node-title">Integration</h3>
+            <div class="node-meta"><span class="tag">联调</span></div>
+            <p>跨 agent 成果开始真正拼接。</p>
+          </article>
+          <article class="node agent claude">
+            <h3 class="node-title">Testing</h3>
+            <div class="node-meta"><span class="tag">测试</span></div>
+            <p>验证局部与整体行为是否符合预期。</p>
+          </article>
+          <article class="node agent claude">
+            <h3 class="node-title">Real Run Validation</h3>
+            <div class="node-meta"><span class="tag">实跑验证</span></div>
+            <p>真正把系统跑起来，看流程是否闭环。</p>
+          </article>
+          <article class="node router">
+            <h3 class="node-title">Conditional Return Router</h3>
+            <div class="node-meta"><span class="tag">按问题性质回流</span></div>
+            <p>问题可能回到实现 agent、Global Reviewer、planner，必要时甚至回到更早的 design 层。</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer-note">
+      这是一版单 HTML 原型：重点在于先把层级、回环、角色关系和条件回流讲清楚，而不是把所有真实节点塞满。下一版如果继续迭代，可以把每层节点做得更细、把连接线画成更强的可视化网络，并加入适度交互高亮。
+    </div>
+  </div>
+</body>
+</html>
