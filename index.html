@@ -276,6 +276,27 @@
       background: rgba(255,255,255,.025);
     }
 
+    .microloop{
+      position:relative;
+      margin-top:10px;
+      padding:12px;
+      border:1px dashed rgba(255,255,255,.14);
+      border-radius:22px;
+      background:rgba(255,255,255,.02);
+      min-height:152px;
+      overflow:hidden;
+    }
+    .microloop svg{width:100%;height:140px;display:block}
+    .microloop .cap{
+      position:absolute;
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(8,17,31,.92);
+      border:1px solid rgba(255,255,255,.08);
+      font-size:10px;
+      color:#dce7ff;
+      white-space:nowrap;
+    }
     .footer {
       margin-top: 22px;
       background: rgba(14,27,48,.88);
@@ -372,34 +393,17 @@
 
           <div class="design-center">
             <div class="loop-label">Loop Core</div>
-            <article class="node">
-              <h4>多路问题发现</h4>
-              <div class="meta"><span class="tag">并行</span><span class="tag">Review Cluster</span></div>
-              <ul>
-                <li>多个 agent review</li>
-                <li>Human review</li>
-                <li>同事飞书评论</li>
-                <li>带 design 探索其他服务代码</li>
-              </ul>
-            </article>
-            <div class="arrow-row">↓</div>
-            <article class="node human">
-              <h4>评论整合与逐条讨论</h4>
-              <div class="meta"><span class="tag">Human ↔ Agent</span></div>
-              <p>agent 先汇总评论，再和人逐条讨论，解决完一批就更新一次 design。</p>
-            </article>
-            <div class="arrow-row">↓</div>
-            <article class="node reviewer">
-              <h4>技术评审 / 新问题暴露</h4>
-              <div class="meta"><span class="tag">Tech Review</span><span class="tag">例：流量评估</span></div>
-              <p>现实约束与技术风险被显性提出，触发新一轮回查。</p>
-            </article>
-            <div class="arrow-row">↓</div>
-            <article class="node claude">
-              <h4>带问题继续找答案</h4>
-              <div class="meta"><span class="tag">Claude / Agent</span><span class="tag">再查证</span></div>
-              <p>把新问题变成进一步探索输入，再收回到 design。</p>
-            </article>
+            <div class="microloop">
+              <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+                <defs><marker id="mDesign" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(122,160,255,.85)"/></marker></defs>
+                <path d="M70 28 C 26 30, 14 66, 36 98 C 58 126, 114 128, 156 100 C 194 74, 236 66, 272 74 C 302 80, 308 44, 264 26 C 220 10, 144 8, 70 28" fill="none" stroke="rgba(122,160,255,.82)" stroke-width="3.5" marker-end="url(#mDesign)"/>
+              </svg>
+              <div class="cap" style="left:16px;top:18px">多路找问题</div>
+              <div class="cap human" style="right:18px;top:24px">逐条讨论</div>
+              <div class="cap reviewer" style="right:28px;bottom:26px">技术评审 / 新问题</div>
+              <div class="cap claude" style="left:74px;bottom:18px">带问题回查 → 更新 design</div>
+            </div>
+            <div class="tiny-note">把 design 的核心循环直接画在模块内部，而不是只用文字说明它会循环。</div>
           </div>
 
           <div class="loop-box">
@@ -409,7 +413,7 @@
               <div class="meta"><span class="tag">清晰思路</span><span class="tag">稳定起点</span></div>
               <p>代码不多，但路线、边界、约束已经清楚，可以进入跨仓任务拆解。</p>
             </article>
-            <div class="tiny-note">Loop A：design → 多路找问题 → 逐条讨论 → 技术评审 / 新问题 → 带问题继续找答案 → 更新 design → 再循环</div>
+            <div class="tiny-note">Loop A：初版 design → 多路找问题 → 逐条讨论 → 技术评审 / 新问题 → 带问题继续找答案 → 再收回 design。</div>
           </div>
         </div>
       </section>
@@ -464,38 +468,47 @@
         <div class="parallel-agents">
           <div class="agent-loop">
             <div class="agent-name"><strong>Repo Agent A</strong><span class="tag">Loop B</span></div>
-            <article class="node claude"><h4>Claude Code Plan</h4><p>先出 plan。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node codex"><h4>Codex Review</h4><p>异构 review。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node human"><h4>不接受点 ↔ 人机讨论</h4><p>planner 提出不接受点，和人讨论，修正 plan。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node reviewer"><h4>Reviewer Gate</h4><p>是否过关，由 reviewer 判断。</p></article>
-            <div class="arc">回环：plan → review → 分歧讨论 → 修正 → 再 review</div>
+            <div class="microloop">
+              <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+                <defs><marker id="mPlanA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,127,156,.9)"/></marker></defs>
+                <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="3.5" marker-end="url(#mPlanA)"/>
+              </svg>
+              <div class="cap claude" style="left:18px;top:56px">plan</div>
+              <div class="cap codex" style="left:116px;top:12px">review</div>
+              <div class="cap human" style="right:20px;top:58px">不接受点 / 讨论</div>
+              <div class="cap reviewer" style="left:106px;bottom:14px">修正 → gate</div>
+            </div>
+            <div class="arc">每个 agent 内部，loop 本体就是：plan → review → 分歧讨论 → 修正 → reviewer 判断。</div>
           </div>
 
           <div class="agent-loop">
             <div class="agent-name"><strong>Repo Agent B</strong><span class="tag">Loop B</span></div>
-            <article class="node claude"><h4>Claude Code Plan</h4><p>同样先 plan。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node codex"><h4>Codex Review</h4><p>review 是否合理。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node human"><h4>不接受点 ↔ 人机讨论</h4><p>对 review 结果做分歧讨论。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node reviewer"><h4>Reviewer Gate</h4><p>通过则进入实现。</p></article>
-            <div class="arc">回环不是人拍板，也不是 planner 自己说了算，而是 reviewer 作为出口闸门。</div>
+            <div class="microloop">
+              <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+                <defs><marker id="mPlanB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,127,156,.9)"/></marker></defs>
+                <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="3.5" marker-end="url(#mPlanB)"/>
+              </svg>
+              <div class="cap claude" style="left:18px;top:56px">plan</div>
+              <div class="cap codex" style="left:116px;top:12px">review</div>
+              <div class="cap human" style="right:20px;top:58px">讨论</div>
+              <div class="cap reviewer" style="left:106px;bottom:14px">gate</div>
+            </div>
+            <div class="arc">三个 agent 并排存在，但每个内部都是自己的一套小环。</div>
           </div>
 
           <div class="agent-loop">
             <div class="agent-name"><strong>Rule Engine Config Agent</strong><span class="tag">Loop B</span></div>
-            <article class="node claude"><h4>Claude Code Plan</h4><p>专项能力任务先 plan。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node codex"><h4>Codex Review</h4><p>review 可行性与边界。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node human"><h4>不接受点 ↔ 人机讨论</h4><p>把 planner 不接受的部分拿出来讨论。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node reviewer"><h4>Reviewer Gate</h4><p>通过则直接 coding。</p></article>
-            <div class="arc">三组 loop 并排存在，但结构相似，便于形成稳定编排。</div>
+            <div class="microloop">
+              <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+                <defs><marker id="mPlanC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(255,127,156,.9)"/></marker></defs>
+                <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(255,127,156,.86)" stroke-width="3.5" marker-end="url(#mPlanC)"/>
+              </svg>
+              <div class="cap claude" style="left:18px;top:56px">plan</div>
+              <div class="cap codex" style="left:116px;top:12px">review</div>
+              <div class="cap human" style="right:20px;top:58px">讨论</div>
+              <div class="cap reviewer" style="left:106px;bottom:14px">gate</div>
+            </div>
+            <div class="arc">这里不再只写文字，而是直接把 plan loop 画进模块内部。</div>
           </div>
         </div>
       </section>
@@ -511,32 +524,45 @@
         <div class="parallel-agents">
           <div class="agent-loop">
             <div class="agent-name"><strong>Impl Loop A</strong><span class="tag">Codex Coding</span></div>
-            <article class="node codex"><h4>New Codex Coding Session</h4><p>新开 Codex session 专门写代码。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node"><h4>Parallel Reviews</h4><p>2 Claude Code + 1 Codex + 2 Mira 并行审查。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node codex"><h4>Coder Summarizes Reviews</h4><p>写代码的 session 统一汇总 review。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node codex"><h4>Rebut / Accept / Modify</h4><p>通过反驳机制吸收或拒绝意见，再修正代码。</p></article>
-            <div class="arc">Loop C：coding → parallel review → summarize → rebut / accept → revise → review again</div>
+            <div class="microloop">
+              <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+                <defs><marker id="mImplA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(94,213,148,.9)"/></marker></defs>
+                <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(94,213,148,.88)" stroke-width="3.5" marker-end="url(#mImplA)"/>
+              </svg>
+              <div class="cap codex" style="left:18px;top:56px">coding</div>
+              <div class="cap" style="left:100px;top:12px">5 路 review</div>
+              <div class="cap codex" style="right:18px;top:58px">汇总 / 反驳</div>
+              <div class="cap codex" style="left:98px;bottom:14px">修正 → 再审</div>
+            </div>
+            <div class="arc">实现阶段也不是线性推进，而是 coding / review / rebut / modify 的第二组回环。</div>
           </div>
           <div class="agent-loop">
             <div class="agent-name"><strong>Impl Loop B</strong><span class="tag">Same Pattern</span></div>
-            <article class="node codex"><h4>New Coding Session</h4><p>另一个 agent 同样进入 coding loop。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node"><h4>Parallel Reviews</h4><p>同样拉起多 reviewer 阵列。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node codex"><h4>Summarize & Iterate</h4><p>汇总后再反驳或修正。</p></article>
-            <div class="arc">局部都能形成自己的实现回环。</div>
+            <div class="microloop">
+              <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+                <defs><marker id="mImplB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(94,213,148,.9)"/></marker></defs>
+                <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(94,213,148,.88)" stroke-width="3.5" marker-end="url(#mImplB)"/>
+              </svg>
+              <div class="cap codex" style="left:18px;top:56px">coding</div>
+              <div class="cap" style="left:104px;top:12px">parallel review</div>
+              <div class="cap codex" style="right:18px;top:58px">汇总</div>
+              <div class="cap codex" style="left:100px;bottom:14px">modify</div>
+            </div>
+            <div class="arc">三个 implementation 模块并排，各自独立成环。</div>
           </div>
           <div class="agent-loop">
             <div class="agent-name"><strong>Impl Loop C</strong><span class="tag">Same Pattern</span></div>
-            <article class="node codex"><h4>New Coding Session</h4><p>专项能力任务也进入 coding loop。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node"><h4>Parallel Reviews</h4><p>多 reviewer 一起看。</p></article>
-            <div class="arrow-row">↓</div>
-            <article class="node codex"><h4>Summarize & Iterate</h4><p>统一通过 coder 继续迭代。</p></article>
-            <div class="arc">局部收敛 ≠ 全局收敛。</div>
+            <div class="microloop">
+              <svg viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+                <defs><marker id="mImplC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="rgba(94,213,148,.9)"/></marker></defs>
+                <path d="M54 70 C 54 24, 124 8, 178 22 C 232 36, 270 72, 254 104 C 238 134, 168 136, 118 122 C 78 112, 54 94, 54 70" fill="none" stroke="rgba(94,213,148,.88)" stroke-width="3.5" marker-end="url(#mImplC)"/>
+              </svg>
+              <div class="cap codex" style="left:18px;top:56px">coding</div>
+              <div class="cap" style="left:104px;top:12px">review</div>
+              <div class="cap codex" style="right:18px;top:58px">rebut</div>
+              <div class="cap codex" style="left:100px;bottom:14px">modify</div>
+            </div>
+            <div class="arc">局部都能形成实现回环，但后面还要汇总到更大的 reviewer。</div>
           </div>
         </div>
         <div class="global-wrap" style="margin-top:16px;">
